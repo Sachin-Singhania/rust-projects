@@ -1,4 +1,4 @@
-use std::{env::args, fs::File, io::{self, copy, BufReader}, path::Path};
+use std::{env::args, fs::File, io::{self, copy, BufReader}, path::Path, time::Instant};
 
 use flate2::{write::GzEncoder, Compression};
 fn get_output_file_name(path:&str)->io::Result<String>{
@@ -22,7 +22,7 @@ fn get_output_file_name(path:&str)->io::Result<String>{
 fn main()->io::Result<()> {
     let arguments:Vec<String>=args().collect();
     println!("{arguments:?}");
-    if arguments.len()!=3 {
+    if arguments.len()<4 {
         eprintln!("Enter correct arguments");
     }
     let input_file=&arguments[1];
@@ -36,12 +36,13 @@ fn main()->io::Result<()> {
     
     let mut encode=GzEncoder::new(create_new_file,Compression::default());
 
-
+    let start=Instant::now();
     copy(&mut input, &mut encode)?;
     println!(
         "Source len: {:?}",
         input.get_ref().metadata().unwrap().len()
     );
     println!("Target len: {:?}", encode.finish().unwrap().metadata().unwrap().len());
+    println!("Time elapsed: {:?}", start.elapsed());
     Ok(())
 }
